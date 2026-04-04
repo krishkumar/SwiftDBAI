@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SwiftDBAI - Promo Review</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'SF Pro', system-ui, sans-serif; background: #0a0a0a; color: #e5e5e5; line-height: 1.6; }
+.container { max-width: 1200px; margin: 0 auto; padding: 40px 24px; }
+h1 { font-size: 2.5rem; font-weight: 700; margin-bottom: 8px; background: linear-gradient(135deg, #60a5fa, #a78bfa); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+h2 { font-size: 1.5rem; font-weight: 600; margin: 48px 0 16px; color: #f5f5f5; border-bottom: 1px solid #333; padding-bottom: 8px; }
+h3 { font-size: 1.1rem; font-weight: 600; margin: 32px 0 12px; color: #a78bfa; }
+.subtitle { color: #888; font-size: 1.1rem; margin-bottom: 40px; }
+.screenshot-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 24px; margin: 24px 0; }
+.screenshot-card { background: #1a1a1a; border-radius: 16px; overflow: hidden; border: 1px solid #2a2a2a; }
+.screenshot-card img { width: 100%; display: block; }
+.screenshot-card .caption { padding: 16px; font-size: 0.9rem; color: #aaa; }
+.screenshot-card .caption strong { color: #e5e5e5; display: block; margin-bottom: 4px; }
+.device-frame { background: #000; padding: 8px; border-radius: 20px; margin: 0 auto; max-width: 320px; }
+.device-frame img { border-radius: 12px; }
+.copy-section { background: #1a1a1a; border-radius: 12px; padding: 24px; margin: 16px 0; border: 1px solid #2a2a2a; }
+.copy-section pre { white-space: pre-wrap; font-family: inherit; color: #d4d4d4; font-size: 0.95rem; }
+.copy-section .label { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.1em; color: #60a5fa; margin-bottom: 12px; font-weight: 600; }
+.video-section { margin: 24px 0; }
+.video-section video { width: 100%; max-width: 600px; border-radius: 16px; border: 1px solid #2a2a2a; }
+.badge { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; margin: 2px 4px; }
+.badge-green { background: #065f46; color: #6ee7b7; }
+.badge-blue { background: #1e3a5f; color: #93c5fd; }
+.badge-purple { background: #3b0764; color: #c4b5fd; }
+code, .code { font-family: 'SF Mono', 'Menlo', 'Monaco', monospace; font-size: 0.85rem; }
+.code-block { background: #111; border: 1px solid #2a2a2a; border-radius: 8px; padding: 16px 20px; overflow-x: auto; margin: 12px 0; font-family: 'SF Mono', monospace; font-size: 0.85rem; line-height: 1.5; color: #d4d4d4; }
+.code-block .kw { color: #c792ea; }
+.code-block .type { color: #82aaff; }
+.code-block .str { color: #c3e88d; }
+.code-block .comment { color: #546e7a; }
+.code-block .param { color: #f78c6c; }
+.pipeline { display: flex; align-items: center; gap: 0; flex-wrap: wrap; margin: 20px 0; }
+.pipeline-step { background: #1a1a1a; border: 1px solid #333; border-radius: 8px; padding: 12px 16px; text-align: center; min-width: 120px; }
+.pipeline-step .step-num { font-size: 0.7rem; color: #60a5fa; text-transform: uppercase; letter-spacing: 0.1em; }
+.pipeline-step .step-label { font-weight: 600; font-size: 0.9rem; margin-top: 4px; }
+.pipeline-step .step-detail { font-size: 0.75rem; color: #888; margin-top: 2px; }
+.pipeline-arrow { color: #444; font-size: 1.5rem; padding: 0 6px; }
+.constraint-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin: 16px 0 32px; }
+.constraint { background: #1a1a1a; border-radius: 8px; padding: 12px 16px; border-left: 3px solid #22c55e; }
+.constraint .check { color: #22c55e; font-weight: bold; }
+hr { border: none; border-top: 1px solid #2a2a2a; margin: 40px 0; }
+</style>
+</head>
+<body>
+<div class="container">
+
+<h1>SwiftDBAI</h1>
+<p class="subtitle">Your app already has a database. Now let your users ask it questions.</p>
+
+<div class="code-block" style="max-width: 520px;"><span class="comment">// That's it. One view. Done.</span>
+<span class="type">DataChatView</span>(
+    <span class="param">databasePath</span>: myDB.path,
+    <span class="param">model</span>: <span class="type">OllamaLanguageModel</span>(<span class="param">model</span>: <span class="str">"qwen3"</span>)
+)</div>
+
+<div class="constraint-grid">
+  <div class="constraint"><span class="check">&#10003;</span> Works with GRDB, Core Data, SwiftData, raw SQLite</div>
+  <div class="constraint"><span class="check">&#10003;</span> Zero schema annotations &mdash; auto-introspection</div>
+  <div class="constraint"><span class="check">&#10003;</span> Any LLM &mdash; OpenAI, Anthropic, Ollama, on-device</div>
+  <div class="constraint"><span class="check">&#10003;</span> Read-only by default &mdash; safe for production</div>
+  <div class="constraint"><span class="check">&#10003;</span> Charts &amp; tables auto-generated from results</div>
+  <div class="constraint"><span class="check">&#10003;</span> Headless <code>ChatEngine</code> for custom UI</div>
+</div>
+
+<!-- SCREENSHOTS -->
+<h2>What Your Users See</h2>
+<p style="color: #888; margin-bottom: 16px;">Demo: a database of 2,000 GitHub repos with live star counts. Every number verifiable on github.com.</p>
+
+<h3>iPad</h3>
+<div class="screenshot-grid">
+  <div class="screenshot-card">
+    <img src="01-empty-state.png" alt="Empty state">
+    <div class="caption">
+      <strong>Empty State</strong>
+      Clean onboarding: "Ask a question about your data"
+    </div>
+  </div>
+  <div class="screenshot-card">
+    <img src="02-github-top-repos.png" alt="Top repos bar chart">
+    <div class="caption">
+      <strong>Top Repos Bar Chart</strong>
+      "What are the most starred repos on GitHub?" &mdash; Bar chart with real star counts. codecrafters-io at 486K, freeCodeCamp at 441K.
+    </div>
+  </div>
+  <div class="screenshot-card">
+    <img src="03-language-breakdown.png" alt="Language breakdown">
+    <div class="caption">
+      <strong>Language Breakdown</strong>
+      "Which programming languages are most popular?" &mdash; Python 359 repos, TypeScript 312, JavaScript 248. Aggregation query with chart + table.
+    </div>
+  </div>
+  <div class="screenshot-card">
+    <img src="04-sql-revealed.png" alt="Generated SQL revealed">
+    <div class="caption">
+      <strong>Generated SQL</strong>
+      Tap "</> SQL Query" to inspect the LLM-generated SQL. Full transparency &mdash; <code>SELECT language, COUNT(*) ... GROUP BY language ORDER BY total_stars DESC</code>
+    </div>
+  </div>
+</div>
+
+<h3>iPhone 16 Pro Max</h3>
+<div style="text-align: center; margin: 24px 0;">
+  <div class="device-frame">
+    <img src="iphone-01-empty.png" alt="iPhone empty state">
+  </div>
+  <p style="color: #888; margin-top: 12px; font-size: 0.9rem;">iPhone empty state &mdash; 9:41 status bar</p>
+</div>
+
+<!-- VIDEO -->
+<h2>Video</h2>
+<div class="video-section">
+  <video controls>
+    <source src="demo-github.mp4" type="video/mp4">
+  </video>
+  <p style="color: #888; margin-top: 8px; font-size: 0.9rem;">Full demo flow: top repos → language breakdown (5.1 MB, ~3 min)</p>
+</div>
+
+<!-- TECHNICAL -->
+<h2>How It Works</h2>
+
+<h3>Add to Your Existing App</h3>
+<div class="code-block"><span class="comment">// Your app already has a database. Just point SwiftDBAI at it.</span>
+<span class="kw">import</span> <span class="type">SwiftDBAI</span>
+
+<span class="comment">// Works with GRDB DatabasePool, Core Data .sqlite stores, anything</span>
+<span class="kw">let</span> dbPath = <span class="type">URL</span>.documentsDirectory.appending(path: <span class="str">"myapp.sqlite"</span>).path()
+
+<span class="type">DataChatView</span>(
+    <span class="param">databasePath</span>: dbPath,
+    <span class="param">model</span>: <span class="type">OpenAILanguageModel</span>(<span class="param">apiKey</span>: key),
+    <span class="param">allowlist</span>: .readOnly,          <span class="comment">// safe for production</span>
+    <span class="param">additionalContext</span>: <span class="str">"E-commerce app with orders, products, and customers."</span>
+)</div>
+
+<h3>Pipeline</h3>
+<div class="pipeline">
+  <div class="pipeline-step">
+    <div class="step-num">Step 1</div>
+    <div class="step-label">Schema Introspection</div>
+    <div class="step-detail">GRDB reads all tables, columns, types automatically</div>
+  </div>
+  <span class="pipeline-arrow">&rarr;</span>
+  <div class="pipeline-step">
+    <div class="step-num">Step 2</div>
+    <div class="step-label">Prompt Building</div>
+    <div class="step-detail">Schema + context + user question → LLM prompt</div>
+  </div>
+  <span class="pipeline-arrow">&rarr;</span>
+  <div class="pipeline-step">
+    <div class="step-num">Step 3</div>
+    <div class="step-label">SQL Generation</div>
+    <div class="step-detail">LLM outputs raw SQL (any provider via AnyLanguageModel)</div>
+  </div>
+  <span class="pipeline-arrow">&rarr;</span>
+  <div class="pipeline-step">
+    <div class="step-num">Step 4</div>
+    <div class="step-label">Safe Execution</div>
+    <div class="step-detail">Validated against allowlist, then executed on SQLite</div>
+  </div>
+  <span class="pipeline-arrow">&rarr;</span>
+  <div class="pipeline-step">
+    <div class="step-num">Step 5</div>
+    <div class="step-label">Presentation</div>
+    <div class="step-detail">LLM summarizes results + auto charts &amp; tables</div>
+  </div>
+</div>
+
+<h3>Architecture</h3>
+<div class="code-block"><span class="comment">// The full stack — you can use any layer independently</span>
+
+<span class="type">DataChatView</span>          <span class="comment">// SwiftUI view (one-liner)</span>
+  └─ <span class="type">ChatView</span>            <span class="comment">// Chat UI with bubbles, tables, charts</span>
+      └─ <span class="type">ChatViewModel</span>    <span class="comment">// Manages conversation state</span>
+          └─ <span class="type">ChatEngine</span>    <span class="comment">// Orchestrator (headless, no UI dependency)</span>
+              ├─ <span class="type">PromptBuilder</span>    <span class="comment">// Schema context + SQL instructions</span>
+              ├─ <span class="type">SQLParser</span>        <span class="comment">// Multi-strategy SQL extraction</span>
+              ├─ <span class="type">QueryExecutor</span>    <span class="comment">// GRDB execution with timeout</span>
+              └─ <span class="type">OperationAllowlist</span> <span class="comment">// Safety: readOnly, standard, custom</span></div>
+
+<h3>LLM Provider Support</h3>
+<p style="margin: 12px 0; color: #aaa;">Powered by <a href="https://github.com/huggingface/AnyLanguageModel" style="color: #60a5fa;">AnyLanguageModel</a> (Hugging Face) — a unified interface for multiple LLM providers:</p>
+<div class="code-block"><span class="comment">// Cloud providers</span>
+<span class="type">OpenAILanguageModel</span>(<span class="param">apiKey</span>: <span class="str">"sk-..."</span>)
+<span class="type">AnthropicLanguageModel</span>(<span class="param">apiKey</span>: <span class="str">"sk-ant-..."</span>)
+<span class="type">GeminiLanguageModel</span>(<span class="param">apiKey</span>: <span class="str">"..."</span>)
+
+<span class="comment">// Local / private — data never leaves the device</span>
+<span class="type">OllamaLanguageModel</span>(<span class="param">model</span>: <span class="str">"qwen3-coder"</span>)
+<span class="type">LlamaCppLanguageModel</span>(<span class="param">modelPath</span>: <span class="str">"model.gguf"</span>)</div>
+
+<h3>Safety</h3>
+<div class="code-block"><span class="comment">// Read-only by default — no INSERT, UPDATE, DELETE, DROP</span>
+<span class="param">allowlist</span>: .readOnly
+
+<span class="comment">// Or fine-grained per-table mutation control</span>
+<span class="param">allowlist</span>: .<span class="type">custom</span>(<span class="type">MutationPolicy</span>(
+    <span class="param">tables</span>: [<span class="str">"orders"</span>: .readOnly, <span class="str">"cart"</span>: .readWrite],
+    <span class="param">confirmDestructive</span>: <span class="kw">true</span>
+))</div>
+
+<hr>
+
+<!-- COPY -->
+<h2>Social Copy</h2>
+
+<h3>Twitter / X</h3>
+<div class="copy-section">
+  <div class="label">Tweet</div>
+  <pre>I got tired of building filter/search screens every time I needed to surface data from a SQLite database in an iOS app. So I made a SwiftUI view that lets users just type questions in English.
+
+DataChatView(databasePath: db, model: myLLM)
+
+It reads the schema, asks the LLM for SQL, runs it, and renders the results as tables and charts. Works with any .sqlite file — GRDB, Core Data, SwiftData, whatever.
+
+Read-only by default. Any LLM. MIT licensed.</pre>
+</div>
+
+<h3>Twitter / X &mdash; Thread</h3>
+<div class="copy-section">
+  <div class="label">Thread (4 posts)</div>
+  <pre><strong>1/4</strong> I've been working on SwiftDBAI — a Swift package that adds natural language queries to any SQLite database.
+
+You point it at a .sqlite file, give it an LLM, and it handles the rest: schema introspection, prompt building, SQL generation, safety validation, and rendering results as tables and charts.
+
+<strong>2/4</strong> Here's the entire integration:
+
+DataChatView(
+    databasePath: path,
+    model: OpenAILanguageModel(apiKey: key),
+    allowlist: .readOnly
+)
+
+It reads your schema automatically — no annotations, no mapping files. I use GRDB under the hood for introspection and query execution.
+
+<strong>3/4</strong> The LLM layer uses AnyLanguageModel from Hugging Face, so you can swap between:
+
+- OpenAI, Anthropic, Gemini
+- Ollama or llama.cpp for local/private
+- Apple Foundation Models on iOS 26
+
+The interesting part is that read-only is the default. The allowlist validates every generated query before it touches your database.
+
+<strong>4/4</strong> For the demo I pointed it at a database of ~2,000 top GitHub repos with live star counts. The exact numbers change daily, so you can tell the results are coming from the database, not the LLM's training data.
+
+There's also a headless ChatEngine if you want to skip the built-in UI and do your own thing.
+
+Swift 6.1+, iOS 17+, MIT. github.com/...</pre>
+</div>
+
+<h3>Blog Post</h3>
+<div class="copy-section">
+  <div class="label">Article Draft</div>
+  <pre><strong>SwiftDBAI: natural language queries for SQLite databases on iOS</strong>
+
+I've been building iOS apps with SQLite (via GRDB) for a while, and one pattern keeps coming up: users want to find things in their data, and I keep building custom filter views, search screens, and report pages to let them.
+
+Each query is its own UI. "Show me orders from last month" needs a date picker and a list view. "Which products sold the most?" needs a different screen. "How many customers are in California?" is another one. They all follow the same pattern — take a question, turn it into SQL, show the results — but each one is a bespoke piece of UI work.
+
+So I built a library that does the generic version of this.
+
+<strong>What it does</strong>
+
+SwiftDBAI is a Swift package with two main entry points:
+
+- DataChatView — a SwiftUI view you drop into your app. It provides a chat interface where users type questions in English and get back results as tables and charts.
+- ChatEngine — a headless version for when you want to handle the UI yourself.
+
+Both work the same way:
+
+1. Read the database schema (tables, columns, types, foreign keys) via GRDB
+2. Build a prompt that includes the schema and the user's question
+3. Send it to an LLM to generate SQL
+4. Validate the SQL against an allowlist (SELECT only, by default)
+5. Execute the query and render results
+6. Ask the LLM to summarize the raw data in plain English
+
+The schema introspection is automatic. You don't annotate your models or write mapping files. Point it at any .sqlite file and it figures out what's there.
+
+<strong>LLM providers</strong>
+
+I'm using AnyLanguageModel from Hugging Face, which gives you a single interface across different LLM providers. You can plug in:
+
+- Cloud models: OpenAI, Anthropic, Gemini
+- Local models: Ollama, llama.cpp (data stays on device)
+- On-device: Apple Foundation Models on iOS 26+
+
+Switching providers is one line. The rest of the pipeline doesn't change.
+
+I've tested it with GPT-4o, Claude Haiku, and Qwen 3 running locally through Ollama. They all work, though the quality of generated SQL varies — larger models handle JOINs and GROUP BY better, as you'd expect.
+
+<strong>Safety</strong>
+
+The default allowlist is read-only. No INSERT, UPDATE, DELETE, DROP, or ALTER will execute. This felt like the right default for a library that generates SQL from user input.
+
+If you need writes, you can configure per-table policies:
+
+allowlist: .custom(MutationPolicy(
+    tables: ["cart": .readWrite, "orders": .readOnly]
+))
+
+There's also a confirmation delegate for destructive operations if you enable them.
+
+<strong>The demo</strong>
+
+For the demo app, I needed data that was obviously coming from the database and not from the LLM's memory. I settled on GitHub star counts — I fetched the top 2,000 repos from the GitHub API and bundled them as a SQLite file.
+
+The star counts change daily, so when the app says "codecrafters-io/build-your-own-x has 486,179 stars," you can open github.com and check. An LLM would give you a different (stale) number. That's the point.
+
+<strong>Getting started</strong>
+
+.package(url: "https://github.com/&lt;org&gt;/SwiftDBAI.git", from: "1.0.0")
+
+import SwiftDBAI
+
+DataChatView(
+    databasePath: myDatabase.path,
+    model: OpenAILanguageModel(apiKey: key),
+    allowlist: .readOnly,
+    additionalContext: "E-commerce app with orders, products, and customers."
+)
+
+The additionalContext parameter helps the LLM understand what the data represents. It's optional but improves the quality of generated SQL.
+
+If you don't want the built-in chat UI:
+
+let engine = ChatEngine(database: db, model: myLLM)
+let response = try await engine.ask("How many active users this week?")
+
+Works with any existing .sqlite file — GRDB, Core Data's backing store, SwiftData, or raw SQLite. No migration required.
+
+Swift 6.1+ | iOS 17+ | macOS 14+ | visionOS 1+ | MIT License</pre>
+</div>
+
+<h3>Product Hunt</h3>
+<div class="copy-section">
+  <div class="label">Tagline</div>
+  <pre>Natural language queries for any SQLite database on iOS — one SwiftUI view</pre>
+</div>
+<div class="copy-section">
+  <div class="label">Description</div>
+  <pre>SwiftDBAI is a Swift package that adds a chat interface to any SQLite database. Point it at a .sqlite file (GRDB, Core Data, SwiftData, raw SQLite), give it an LLM, and users can ask questions in English.
+
+It reads the schema automatically, generates SQL, validates it against a read-only allowlist, and renders results as tables and charts. Works with OpenAI, Anthropic, Ollama, or local models.
+
+The demo uses live GitHub star counts so you can verify every result on github.com.</pre>
+</div>
+
+<hr>
+<p style="color: #555; font-size: 0.8rem; text-align: center; margin-top: 24px;">
+  Dataset: 1,990 repos with 20K+ stars &bull; Fetched April 5, 2026 via GitHub API &bull; 680 KB SQLite
+</p>
+
+</div>
+</body>
+</html>
