@@ -112,13 +112,6 @@ public struct SQLQueryParser: Sendable {
     /// Attempts to extract a SQL statement from the LLM response text.
     /// Tries multiple strategies in order of confidence.
     func extractSQL(from text: String) throws -> String {
-        // Pre-clean: strip stray markdown backticks that some LLMs leave
-        // attached to the SQL (e.g. "SELECT * FROM t ```" or "```SELECT ...")
-        let cleaned = text
-            .replacingOccurrences(of: "```sql", with: "")
-            .replacingOccurrences(of: "```", with: "")
-            .trimmingCharacters(in: .whitespacesAndNewlines)
-
         // Strategy 1: SQL in markdown fenced code block with sql language tag
         if let sql = extractFromSQLCodeBlock(text) {
             return sql
@@ -139,12 +132,25 @@ public struct SQLQueryParser: Sendable {
             return sql
         }
 
-        // Strategy 5: Try direct SQL on the pre-cleaned text (backticks removed)
-        if let sql = extractDirectSQL(cleaned) {
+        // Strategy 5: Strip markdown fence markers (3+ backticks with optional
+        // language tag) and retry. Only removes fences, not single backticks
+        // used for SQLite identifier quoting like `column name`.
+        let defenced = stripMarkdownFences(text)
+        if defenced != text, let sql = extractDirectSQL(defenced) {
             return sql
         }
 
         throw SQLParsingError.noSQLFound
+    }
+
+    /// Removes markdown fence markers (```) while preserving single backtick
+    /// identifier quoting. Handles: ```sql, ```, and trailing ```.
+    private func stripMarkdownFences(_ text: String) -> String {
+        text.replacingOccurrences(
+            of: #"`{3,}\s*(?:sql|SQL)?\s*"#,
+            with: " ",
+            options: .regularExpression
+        ).trimmingCharacters(in: .whitespacesAndNewlines)
     }
 
     /// Extracts SQL from a ```sql ... ``` code block.
