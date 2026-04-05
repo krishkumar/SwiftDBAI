@@ -22,7 +22,7 @@ Add SwiftDBAI via Swift Package Manager:
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/<org>/SwiftDBAI.git", from: "1.0.0"),
+    .package(url: "https://github.com/krishkumar/SwiftDBAI.git", from: "1.0.0"),
 ]
 ```
 
