@@ -17,7 +17,7 @@ let package = Package(
     ],
     dependencies: [
         .package(url: "https://github.com/groue/GRDB.swift.git", from: "7.0.0"),
-        .package(url: "https://github.com/huggingface/AnyLanguageModel.git", branch: "main"),
+        .package(url: "https://github.com/huggingface/AnyLanguageModel.git", from: "0.8.0"),
     ],
     targets: [
         .target(
