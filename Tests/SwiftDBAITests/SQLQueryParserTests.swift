@@ -394,4 +394,236 @@ struct SQLQueryParserTests {
         #expect(error.description.contains("DELETE"))
         #expect(error.description.contains("confirmation"))
     }
+
+    // MARK: - Robust extraction edge cases
+
+    @Test("Extracts plain SQL without any wrapping")
+    func plainSQL() throws {
+        let text = "SELECT * FROM users"
+        let result = try readOnlyParser.parse(text)
+        #expect(result.sql == "SELECT * FROM users")
+    }
+
+    @Test("Extracts SQL from markdown sql code block")
+    func markdownSQLBlock() throws {
+        let text = "```sql\nSELECT * FROM users\n```"
+        let result = try readOnlyParser.parse(text)
+        #expect(result.sql == "SELECT * FROM users")
+    }
+
+    @Test("Extracts SQL from generic code block")
+    func genericCodeBlock() throws {
+        let text = "```\nSELECT * FROM users\n```"
+        let result = try readOnlyParser.parse(text)
+        #expect(result.sql == "SELECT * FROM users")
+    }
+
+    @Test("Strips trailing semicolons")
+    func trailingSemicolonEdge() throws {
+        let text = "SELECT * FROM users;"
+        let result = try readOnlyParser.parse(text)
+        #expect(result.sql == "SELECT * FROM users")
+    }
+
+    @Test("Extracts SQL with preamble text")
+    func preambleText() throws {
+        let text = "Here's the query:\nSELECT * FROM users"
+        let result = try readOnlyParser.parse(text)
+        #expect(result.sql == "SELECT * FROM users")
+    }
+
+    @Test("Handles trailing backticks only (no opening fence)")
+    func trailingBackticksOnly() throws {
+        let text = "SELECT * FROM users\n```"
+        let result = try readOnlyParser.parse(text)
+        #expect(result.sql == "SELECT * FROM users")
+    }
+
+    @Test("Extracts SQL from single-line code block")
+    func singleLineCodeBlock() throws {
+        let text = "```sql SELECT * FROM users ```"
+        let result = try readOnlyParser.parse(text)
+        #expect(result.sql == "SELECT * FROM users")
+    }
+
+    @Test("Handles no newline before closing fence")
+    func noNewlineBeforeClosingFence() throws {
+        let text = "```sql\nSELECT * FROM users```"
+        let result = try readOnlyParser.parse(text)
+        #expect(result.sql == "SELECT * FROM users")
+    }
+
+    @Test("Extracts SQL inline with text prefix")
+    func inlineWithText() throws {
+        let text = "The SQL query is: SELECT * FROM users"
+        let result = try readOnlyParser.parse(text)
+        #expect(result.sql == "SELECT * FROM users")
+    }
+
+    @Test("Handles extra whitespace around SQL")
+    func extraWhitespace() throws {
+        let text = "\n\nSELECT * FROM users\n\n"
+        let result = try readOnlyParser.parse(text)
+        #expect(result.sql == "SELECT * FROM users")
+    }
+
+    @Test("Extracts SQL from chatty LLM response with preamble and postamble")
+    func chattyLLMResponse() throws {
+        let text = "Sure! Here's the SQL:\n\n```sql\nSELECT * FROM users\n```\n\nThis will return all users."
+        let result = try readOnlyParser.parse(text)
+        #expect(result.sql == "SELECT * FROM users")
+    }
+
+    @Test("Preserves SQL comments")
+    func sqlWithComments() throws {
+        let text = "SELECT * FROM users -- get all users"
+        let result = try readOnlyParser.parse(text)
+        #expect(result.sql.contains("-- get all users"))
+    }
+
+    @Test("Preserves backtick-quoted identifiers in SQL")
+    func backtickQuotedIdentifiers() throws {
+        let text = "SELECT `column name` FROM users"
+        let result = try readOnlyParser.parse(text)
+        #expect(result.sql.contains("`column name`"))
+    }
+
+    @Test("Strips think tags from Qwen-style models")
+    func thinkTags() throws {
+        let text = "<think>I need to query the users table</think>\nSELECT * FROM users"
+        let result = try readOnlyParser.parse(text)
+        #expect(result.sql == "SELECT * FROM users")
+        #expect(!result.sql.contains("think"))
+    }
+
+    @Test("Handles 4 or 5 backtick fences")
+    func extraBacktickFences() throws {
+        let text4 = "````sql\nSELECT * FROM users\n````"
+        let result4 = try readOnlyParser.parse(text4)
+        #expect(result4.sql == "SELECT * FROM users")
+
+        let text5 = "`````\nSELECT * FROM users\n`````"
+        let result5 = try readOnlyParser.parse(text5)
+        #expect(result5.sql == "SELECT * FROM users")
+    }
+
+    @Test("Handles mixed case SQL keywords")
+    func mixedCaseSQL() throws {
+        let text = "select * from USERS"
+        let result = try readOnlyParser.parse(text)
+        #expect(result.sql == "select * from USERS")
+    }
+
+    @Test("Handles WITH clause (CTE) queries")
+    func withClause() throws {
+        let text = "WITH cte AS (SELECT id FROM orders) SELECT * FROM cte"
+        let result = try readOnlyParser.parse(text)
+        #expect(result.sql.hasPrefix("WITH"))
+        #expect(result.operation == .select)
+    }
+
+    @Test("Handles WITH clause in code block")
+    func withClauseInCodeBlock() throws {
+        let text = "```sql\nWITH top AS (\n  SELECT user_id, COUNT(*) as cnt FROM orders GROUP BY user_id\n)\nSELECT * FROM top WHERE cnt > 5\n```"
+        let result = try readOnlyParser.parse(text)
+        #expect(result.sql.hasPrefix("WITH"))
+        #expect(result.operation == .select)
+    }
+
+    @Test("Multi-line SQL with JOINs and subqueries in code block")
+    func multiLineJoinsAndSubqueries() throws {
+        let text = """
+        ```sql
+        SELECT u.name, o.total
+        FROM users u
+        INNER JOIN orders o ON u.id = o.user_id
+        WHERE o.total > (SELECT AVG(total) FROM orders)
+        ORDER BY o.total DESC
+        ```
+        """
+        let result = try readOnlyParser.parse(text)
+        #expect(result.sql.contains("INNER JOIN"))
+        #expect(result.sql.contains("SELECT AVG(total)"))
+        #expect(result.sql.contains("ORDER BY"))
+    }
+
+    @Test("Handles response with both explanation text and SQL")
+    func explanationAndSQL() throws {
+        let text = """
+        To find all active users, we need to query the users table
+        and filter by the active column. Here's the query:
+
+        SELECT * FROM users WHERE active = 1
+
+        This should give you the results you're looking for.
+        """
+        let result = try readOnlyParser.parse(text)
+        #expect(result.sql == "SELECT * FROM users WHERE active = 1")
+    }
+
+    @Test("Throws noSQLFound for empty response")
+    func emptyResponse() throws {
+        #expect(throws: SQLParsingError.noSQLFound) {
+            try readOnlyParser.parse("")
+        }
+        #expect(throws: SQLParsingError.noSQLFound) {
+            try readOnlyParser.parse("   \n\n  ")
+        }
+    }
+
+    @Test("Throws noSQLFound for response with no SQL at all")
+    func noSQLAtAll() throws {
+        #expect(throws: SQLParsingError.noSQLFound) {
+            try readOnlyParser.parse("I cannot help with that question. Please try asking about your data.")
+        }
+    }
+
+    @Test("Handles response with multiple SQL statements in code block (rejects them)")
+    func multipleStatementsInCodeBlock() throws {
+        // When multiple statements are in a code block, the parser sees both and rejects
+        let text = "```sql\nSELECT * FROM users; SELECT * FROM orders\n```"
+        #expect(throws: SQLParsingError.multipleStatements) {
+            try readOnlyParser.parse(text)
+        }
+    }
+
+    @Test("Extracts first SQL statement from plain text with multiple statements")
+    func multipleStatementsPlainText() throws {
+        // In plain text, the direct extraction stops at the semicolon and extracts the first statement
+        let text = "SELECT * FROM users; SELECT * FROM orders"
+        let result = try readOnlyParser.parse(text)
+        #expect(result.sql == "SELECT * FROM users")
+    }
+
+    @Test("Preserves backtick identifiers inside code blocks")
+    func backtickIdentifiersInCodeBlock() throws {
+        let text = "```sql\nSELECT `first name`, `last name` FROM `user data`\n```"
+        let result = try readOnlyParser.parse(text)
+        #expect(result.sql.contains("`first name`"))
+        #expect(result.sql.contains("`last name`"))
+        #expect(result.sql.contains("`user data`"))
+    }
+
+    @Test("Strips think tags with multiline reasoning content")
+    func multilineThinkTags() throws {
+        let text = """
+        <think>
+        The user wants to find all users.
+        I should use SELECT * FROM users.
+        Let me think about which columns to include...
+        </think>
+        SELECT * FROM users
+        """
+        let result = try readOnlyParser.parse(text)
+        #expect(result.sql == "SELECT * FROM users")
+    }
+
+    @Test("Handles mixed backtick styles in response")
+    func mixedBacktickStyles() throws {
+        // Code fences + backtick-quoted identifiers inside
+        let text = "```sql\nSELECT `user name` FROM users WHERE `is active` = 1\n```"
+        let result = try readOnlyParser.parse(text)
+        #expect(result.sql.contains("`user name`"))
+        #expect(result.sql.contains("`is active`"))
+    }
 }

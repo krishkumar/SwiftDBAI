@@ -112,39 +112,51 @@ public struct SQLQueryParser: Sendable {
     /// Attempts to extract a SQL statement from the LLM response text.
     /// Tries multiple strategies in order of confidence.
     func extractSQL(from text: String) throws -> String {
+        // Pre-processing: strip <think>...</think> tags (Qwen-style models)
+        let preprocessed = stripThinkTags(text)
+
         // Strategy 1: SQL in markdown fenced code block with sql language tag
-        if let sql = extractFromSQLCodeBlock(text) {
+        if let sql = extractFromSQLCodeBlock(preprocessed) {
             return sql
         }
 
         // Strategy 2: SQL in generic fenced code block
-        if let sql = extractFromGenericCodeBlock(text) {
+        if let sql = extractFromGenericCodeBlock(preprocessed) {
             return sql
         }
 
         // Strategy 3: SQL after a label like "SQL:" or "Query:"
-        if let sql = extractFromLabel(text) {
+        if let sql = extractFromLabel(preprocessed) {
             return sql
         }
 
-        // Strategy 4: Direct SQL detection in plain text
-        if let sql = extractDirectSQL(text) {
+        // Strategy 4: Direct SQL detection in plain text (includes WITH)
+        if let sql = extractDirectSQL(preprocessed) {
             return sql
         }
 
         // Strategy 5: Strip markdown fence markers (3+ backticks with optional
         // language tag) and retry. Only removes fences, not single backticks
         // used for SQLite identifier quoting like `column name`.
-        let defenced = stripMarkdownFences(text)
-        if defenced != text, let sql = extractDirectSQL(defenced) {
+        let defenced = stripMarkdownFences(preprocessed)
+        if defenced != preprocessed, let sql = extractDirectSQL(defenced) {
             return sql
         }
 
         throw SQLParsingError.noSQLFound
     }
 
-    /// Removes markdown fence markers (```) while preserving single backtick
-    /// identifier quoting. Handles: ```sql, ```, and trailing ```.
+    /// Strips `<think>...</think>` tags produced by Qwen-style reasoning models.
+    private func stripThinkTags(_ text: String) -> String {
+        text.replacingOccurrences(
+            of: #"<think>[\s\S]*?</think>"#,
+            with: "",
+            options: .regularExpression
+        ).trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+
+    /// Removes markdown fence markers (3+ backticks with optional language tag)
+    /// while preserving single backtick identifier quoting like `column name`.
     private func stripMarkdownFences(_ text: String) -> String {
         text.replacingOccurrences(
             of: #"`{3,}\s*(?:sql|SQL)?\s*"#,
@@ -154,16 +166,20 @@ public struct SQLQueryParser: Sendable {
     }
 
     /// Extracts SQL from a ```sql ... ``` code block.
+    /// Handles 3+ backticks, optional newline before closing fence,
+    /// and single-line code blocks like ```sql SELECT ... ```.
     private func extractFromSQLCodeBlock(_ text: String) -> String? {
-        let pattern = #"```sql\s*\n([\s\S]*?)```"#
-        return firstMatch(pattern: pattern, in: text, group: 1)?
+        // Match 3+ backticks with sql tag, content, then 3+ closing backticks
+        let pattern = #"`{3,}sql\s*\n?([\s\S]*?)`{3,}"#
+        return firstMatch(pattern: pattern, in: text, group: 1, options: .caseInsensitive)?
             .trimmingCharacters(in: .whitespacesAndNewlines)
             .nonEmptyOrNil
     }
 
-    /// Extracts SQL from a generic ``` ... ``` code block.
+    /// Extracts SQL from a generic ``` ... ``` code block (no language tag).
+    /// Handles 3+ backticks and flexible whitespace.
     private func extractFromGenericCodeBlock(_ text: String) -> String? {
-        let pattern = #"```\s*\n([\s\S]*?)```"#
+        let pattern = #"`{3,}\s*\n([\s\S]*?)`{3,}"#
         guard let content = firstMatch(pattern: pattern, in: text, group: 1)?
             .trimmingCharacters(in: .whitespacesAndNewlines) else {
             return nil
@@ -173,11 +189,12 @@ public struct SQLQueryParser: Sendable {
         return content.nonEmptyOrNil
     }
 
-    /// Extracts SQL after labels like "SQL:", "Query:", "Here's the query:"
+    /// Extracts SQL after labels like "SQL:", "Query:", "Here's the query:", "The SQL query is:"
     private func extractFromLabel(_ text: String) -> String? {
-        // Match the SQL keyword up to end-of-line (handling multi-line SQL with indentation)
-        let pattern = #"(?:SQL|Query|Statement)\s*:\s*\n?\s*((?:SELECT|INSERT|UPDATE|DELETE|WITH)\b.+?)(?:\n(?!\s)|$)"#
-        guard let content = firstMatch(pattern: pattern, in: text, group: 1, options: [.caseInsensitive, .dotMatchesLineSeparators])?
+        // Match common label patterns followed by a SQL statement.
+        // The SQL ends at a double newline, a single newline followed by non-SQL text, or end-of-string.
+        let pattern = #"(?:SQL|Query|Statement|query is|SQL query is)\s*:\s*\n?\s*((?:SELECT|INSERT|UPDATE|DELETE|WITH)\b(?:[^;'\n]|'[^']*'|\n(?=\s*(?:SELECT|INSERT|UPDATE|DELETE|WITH|FROM|WHERE|JOIN|INNER|LEFT|RIGHT|OUTER|CROSS|ON|AND|OR|ORDER|GROUP|HAVING|LIMIT|OFFSET|UNION|EXCEPT|INTERSECT|AS|SET|INTO|VALUES)\b)|\n(?=\s))*;?)"#
+        guard let content = firstMatch(pattern: pattern, in: text, group: 1, options: [.caseInsensitive])?
             .trimmingCharacters(in: .whitespacesAndNewlines) else {
             return nil
         }
@@ -186,13 +203,21 @@ public struct SQLQueryParser: Sendable {
     }
 
     /// Detects SQL directly in the text by matching known statement patterns.
+    /// Handles SELECT, INSERT, UPDATE, DELETE, and WITH (CTE) statements.
     private func extractDirectSQL(_ text: String) -> String? {
-        // Match SQL statement, allowing semicolons inside single-quoted string literals
-        let pattern = #"(?:^|\n)\s*((?:SELECT|INSERT|UPDATE|DELETE)\b(?:[^;']|'[^']*')*;?)"#
-        guard let content = firstMatch(pattern: pattern, in: text, group: 1, options: .caseInsensitive)?
+        // Match SQL statement starting with a keyword, allowing semicolons inside string literals.
+        // The WITH clause is included to support CTE queries.
+        let pattern = #"(?:^|\n)\s*((?:SELECT|INSERT|UPDATE|DELETE|WITH)\b(?:[^;']|'[^']*')*;?)"#
+        guard var content = firstMatch(pattern: pattern, in: text, group: 1, options: .caseInsensitive)?
             .trimmingCharacters(in: .whitespacesAndNewlines) else {
             return nil
         }
+        // Strip any trailing markdown fence markers that got captured
+        content = content.replacingOccurrences(
+            of: #"\s*`{3,}\s*$"#,
+            with: "",
+            options: .regularExpression
+        ).trimmingCharacters(in: .whitespacesAndNewlines)
         return content.nonEmptyOrNil
     }
 

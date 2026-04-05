@@ -203,9 +203,10 @@ public struct PromptBuilder: Sendable {
     static let outputFormatSection = """
         OUTPUT FORMAT
         =============
-        When generating SQL, call the appropriate tool with the SQL query. \
-        After receiving query results, provide a concise natural language \
-        summary of the data. Be specific with numbers and names from the results. \
-        If no rows are returned, say so clearly.
+        Output ONLY the raw SQL query. \
+        Do NOT wrap the SQL in markdown code fences or backticks. \
+        Do NOT include any explanation, comments, or formatting before or after the SQL. \
+        Do NOT prefix with labels like "SQL:" or "Query:". \
+        The output should be directly executable SQL — nothing else.
         """
 }

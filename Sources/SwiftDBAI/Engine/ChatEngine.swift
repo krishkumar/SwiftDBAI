@@ -503,7 +503,7 @@ public final class ChatEngine: @unchecked Sendable {
 
         let session = LanguageModelSession(
             model: model,
-            instructions: instructions + "\n\nRespond with ONLY the SQL query. No explanations, no markdown, no code fences."
+            instructions: instructions + "\n\nCRITICAL: Respond with ONLY the raw SQL query. Do NOT wrap in markdown code fences or backticks. Do NOT include any explanation, comments, or formatting. The output must be directly executable SQL and nothing else."
         )
 
         let response = try await session.respond(to: userPrompt)
