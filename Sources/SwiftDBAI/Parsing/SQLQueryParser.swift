@@ -112,6 +112,13 @@ public struct SQLQueryParser: Sendable {
     /// Attempts to extract a SQL statement from the LLM response text.
     /// Tries multiple strategies in order of confidence.
     func extractSQL(from text: String) throws -> String {
+        // Pre-clean: strip stray markdown backticks that some LLMs leave
+        // attached to the SQL (e.g. "SELECT * FROM t ```" or "```SELECT ...")
+        let cleaned = text
+            .replacingOccurrences(of: "```sql", with: "")
+            .replacingOccurrences(of: "```", with: "")
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+
         // Strategy 1: SQL in markdown fenced code block with sql language tag
         if let sql = extractFromSQLCodeBlock(text) {
             return sql
@@ -129,6 +136,11 @@ public struct SQLQueryParser: Sendable {
 
         // Strategy 4: Direct SQL detection in plain text
         if let sql = extractDirectSQL(text) {
+            return sql
+        }
+
+        // Strategy 5: Try direct SQL on the pre-cleaned text (backticks removed)
+        if let sql = extractDirectSQL(cleaned) {
             return sql
         }
 
