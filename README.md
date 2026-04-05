@@ -7,6 +7,24 @@ Chat with any SQLite database using natural language.
 ![Platforms](https://img.shields.io/badge/Platforms-iOS%2017%20|%20macOS%2014%20|%20visionOS%201-blue.svg)
 ![License](https://img.shields.io/badge/License-MIT-green.svg)
 
+## Demo
+
+The demo app points SwiftDBAI at a real database of ~2,000 top GitHub repos with live star counts. Every number is verifiable on github.com — the exact counts change daily, so you can tell the results are coming from the database, not the LLM.
+
+| Ask a question | Results with chart | Generated SQL |
+|---|---|---|
+| ![Empty state](Example/promo/01-empty-state.png) | ![Top repos](Example/promo/02-github-top-repos.png) | ![SQL revealed](Example/promo/04-sql-revealed.png) |
+
+"Which programming languages are most popular?" produces a GROUP BY query with auto-generated bar chart:
+
+![Language breakdown](Example/promo/03-language-breakdown.png)
+
+The demo app is at `Example/SwiftDBAIDemo/`. Generate the Xcode project with [xcodegen](https://github.com/yonaskolb/XcodeGen):
+
+```
+cd Example/SwiftDBAIDemo && xcodegen generate
+```
+
 ## Features
 
 - Drop-in SwiftUI chat view (`DataChatView`) -- one line to add a database chat UI
