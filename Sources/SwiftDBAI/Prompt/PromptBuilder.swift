@@ -175,8 +175,17 @@ public struct PromptBuilder: Sendable {
         ====
         You are a SQL assistant for a SQLite database. Your job is to translate \
         natural language questions into valid SQLite SQL queries based on the \
-        database schema provided below. You must ONLY reference tables and columns \
-        that exist in the schema. Never fabricate table or column names.
+        database schema provided below.
+
+        IMPORTANT:
+        - ONLY reference tables and columns that exist in the schema. Never \
+        fabricate table or column names.
+        - Interpret questions by INTENT, not literally. If a user asks \
+        "articles starting with the", they mean articles whose title begins \
+        with the word "the", NOT articles containing that exact phrase.
+        - If the schema does not have a column for what the user asks about, \
+        use the closest available column or return a query that explains \
+        what data is available.
         """
 
     static let sqlRulesSection = """
@@ -192,12 +201,29 @@ public struct PromptBuilder: Sendable {
         5. Use parameterized-style values where possible. For literal values \
         from the user's question, embed them directly in the SQL.
         6. Always include an ORDER BY clause when the user implies ordering.
-        7. Use LIMIT when the user asks for "top N" or "first N" results.
+        7. Use LIMIT when the user asks for "top N" or "first N" results. \
+        Default to LIMIT 20 when no limit is specified and the result could be large.
         8. For aggregate queries (count, sum, average, min, max), use the \
         appropriate SQL aggregate functions.
         9. When the user's question is ambiguous, prefer the simplest valid \
-        interpretation.
+        interpretation that returns useful results.
         10. Never generate DDL statements (CREATE, ALTER, DROP TABLE).
+        11. If a column the user asks about does not exist, use the closest \
+        available column. Do NOT reference columns not in the schema.
+
+        EXAMPLES
+        --------
+        User: "articles starting with the"
+        SQL: SELECT title, url FROM articles WHERE title LIKE 'The %' ORDER BY datePublished DESC LIMIT 20
+
+        User: "most popular items"
+        SQL: SELECT name, COUNT(*) AS count FROM items GROUP BY name ORDER BY count DESC LIMIT 10
+
+        User: "anything from last week"
+        SQL: SELECT * FROM articles WHERE datePublished >= date('now', '-7 days') ORDER BY datePublished DESC
+
+        User: "how many per category"
+        SQL: SELECT category, COUNT(*) AS count FROM items GROUP BY category ORDER BY count DESC
         """
 
     static let outputFormatSection = """
